@@ -1,0 +1,6 @@
+# Runtime dependencies for the analyzer CLI.
+# PyInstaller (build-only) is installed in CI via .github/workflows/release-binaries.yml
+firecrawl-py
+openai
+python-dotenv
+pydantic
