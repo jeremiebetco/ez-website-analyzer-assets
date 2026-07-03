@@ -1,0 +1,77 @@
+========================================================================
+PROJECT PROFILE: EZ WEBSITE ANALYZER
+========================================================================
+
+[1] OVERVIEW & OBJECTIVE
+------------------------------------------------------------------------
+The core objective is comprehensive web scraping: map a site's
+footprint, capture rich page artifacts, and produce structured analysis
+for research, QA, SEO/accessibility review, and technical documentation.
+
+The tool connects Firecrawl rich scraping to a multi-pass OpenAI analysis
+layer, outputting a timestamped run folder under runs/ with raw scrape
+evidence, structured JSON, and a DESIGN.md site analysis summary.
+
+Entry point: src/analyzer.py (run via ./analyzer.sh or analyzer.bat at repo root).
+
+
+[2] THE TECHNICAL PIPELINE
+------------------------------------------------------------------------
+1. FOOTPRINT & MAPPING LAYER (Firecrawl Map API)
+   - Discovers the site's complete internal link network.
+   - Computes total page count for architectural scale context.
+
+2. RICH SCRAPING LAYER (Firecrawl Scrape API)
+   - Per page: markdown, html, rawHtml, links, images, branding, screenshot.
+   - Custom browser actions (CUSTOM_ACTIONS) and interact enrichment for SPAs.
+   - Raw artifacts saved to runs/{timestamp}_{domain}/scrape/ before LLM runs.
+
+3. MULTI-PASS INTELLIGENCE LAYER (OpenAI Structured Outputs)
+   - Pass A: per-page profile (components, sections, flows).
+   - Pass B: site-wide profile (design tokens, global patterns).
+   - Default model: gpt-4o (configurable via OPENAI_MODEL).
+
+4. DELIVERABLE LAYER
+   - DESIGN.md — structured site analysis summary.
+   - components.json — flattened component inventory.
+   - report.md — human-readable summary.
+   - analysis/*.json — structured profiles for programmatic use.
+
+
+[3] CRAWL DEPTH
+------------------------------------------------------------------------
+* SMART SELECTION — up to 25 pages (homepage + high-value paths)
+* FULL CRAWL — up to 80 pages site-wide
+
+Limits configurable via SMART_MAX_PAGES and FULL_MAX_PAGES in .env.
+
+
+[4] DELIVERABLE ARTIFACT
+------------------------------------------------------------------------
+Each run writes to runs/{YYYYMMDD-HHMMSS}_{domain}/ containing:
+  - run-metadata.json, map/links.json
+  - scrape/{page-slug}/ with all raw formats
+  - interact/enrichment.md (when interact ran)
+  - analysis/site-profile.json and analysis/pages/*.json
+  - DESIGN.md, components.json, report.md
+
+The runs/ directory is committed (runs/.gitkeep); run output inside it is
+gitignored.
+
+
+[5] DISTRIBUTION & RELEASES
+------------------------------------------------------------------------
+* .github/workflows/release-binaries.yml runs on tag pushes matching v*.
+* A single tag publishes a GitHub Release on ez-website-analyzer-assets with
+  standalone binaries + SHA-256 checksums. No release artifacts on the analyzer repo.
+* PyInstaller produces single-file console CLIs for Linux, Windows, and macOS
+  Apple Silicon in CI. Binaries are published to the public assets repo only.
+* Runtime deps: requirements.txt (firecrawl-py, openai, python-dotenv,
+  pydantic). PyInstaller is installed only in CI, not in requirements.txt.
+* Frozen binary behavior: .env and runs/ resolve next to the executable
+  (sys.executable), not the PyInstaller temp extraction directory.
+* Binary release assets (ez-website-analyzer-assets):
+  - ez-website-analyzer-linux-x86_64
+  - ez-website-analyzer-windows-x86_64.exe
+  - ez-website-analyzer-macos-arm64
+========================================================================
