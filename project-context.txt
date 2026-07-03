@@ -1,0 +1,78 @@
+========================================================================
+PROJECT PROFILE: WEBSITE REBUILD ANALYZER
+========================================================================
+
+[1] OVERVIEW & OBJECTIVE
+------------------------------------------------------------------------
+The core objective is to scrape websites comprehensively, analyze how they
+are built (UI patterns, components, design tokens, flows), and produce
+rebuild-ready artifacts that an AI coding agent can use to recreate a
+similar site from scratch.
+
+The tool connects Firecrawl rich scraping to a multi-pass OpenAI analysis
+layer, outputting a timestamped run folder under runs/ with raw scrape
+evidence, structured JSON, and an agent-ready DESIGN.md.
+
+Entry point: src/analyzer.py (run via ./analyzer.sh or analyzer.bat at repo root).
+
+
+[2] THE TECHNICAL PIPELINE
+------------------------------------------------------------------------
+1. FOOTPRINT & MAPPING LAYER (Firecrawl Map API)
+   - Discovers the site's complete internal link network.
+   - Computes total page count for architectural scale context.
+
+2. RICH SCRAPING LAYER (Firecrawl Scrape API)
+   - Per page: markdown, html, rawHtml, links, images, branding, screenshot.
+   - Custom browser actions (CUSTOM_ACTIONS) and interact enrichment for SPAs.
+   - Raw artifacts saved to runs/{timestamp}_{domain}/scrape/ before LLM runs.
+
+3. MULTI-PASS INTELLIGENCE LAYER (OpenAI Structured Outputs)
+   - Pass A: per-page PageRebuildProfile (components, sections, flows).
+   - Pass B: site-wide SiteRebuildProfile (design tokens, global patterns).
+   - Default model: gpt-4o (configurable via OPENAI_MODEL).
+
+4. DELIVERABLE LAYER
+   - DESIGN.md — primary agent-ready rebuild specification.
+   - components.json — flattened component inventory.
+   - report.md — human-readable summary.
+   - analysis/*.json — structured profiles for programmatic use.
+
+
+[3] CRAWL DEPTH
+------------------------------------------------------------------------
+* SMART SELECTION — up to 25 pages (homepage + high-value paths)
+* FULL CRAWL — up to 80 pages site-wide
+
+Limits configurable via SMART_MAX_PAGES and FULL_MAX_PAGES in .env.
+
+
+[4] DELIVERABLE ARTIFACT
+------------------------------------------------------------------------
+Each run writes to runs/{YYYYMMDD-HHMMSS}_{domain}/ containing:
+  - run-metadata.json, map/links.json
+  - scrape/{page-slug}/ with all raw formats
+  - interact/enrichment.md (when interact ran)
+  - analysis/site-profile.json and analysis/pages/*.json
+  - DESIGN.md, components.json, report.md
+
+The runs/ directory is committed (runs/.gitkeep); run output inside it is
+gitignored.
+
+
+[5] DISTRIBUTION & RELEASES
+------------------------------------------------------------------------
+* Standalone binaries are built by .github/workflows/release-binaries.yml on
+  tag pushes matching v* (e.g. v0.1.0).
+* PyInstaller produces single-file console CLIs for Linux, Windows, and macOS
+  Apple Silicon. Assets are published to the public ez-website-analyzer-assets
+  GitHub Releases with SHA-256 checksum files.
+* Runtime deps: requirements.txt (firecrawl-py, openai, python-dotenv,
+  pydantic). PyInstaller is installed only in CI, not in requirements.txt.
+* Frozen binary behavior: .env and runs/ resolve next to the executable
+  (sys.executable), not the PyInstaller temp extraction directory.
+* Release assets:
+  - ez-website-analyzer-linux-x86_64
+  - ez-website-analyzer-windows-x86_64.exe
+  - ez-website-analyzer-macos-arm64
+========================================================================
