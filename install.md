@@ -16,9 +16,15 @@ Put the binary in a folder of your choice.
 
 ### 2. Set API keys
 
-Use **either** a `.env` file next to the binary **or** shell environment variables.
+Use **shell environment variables**, a `.env` file next to the binary, and/or `~/.ez-web/.env`. On first run, the binary creates `~/.ez-web/.env` from the bundled template if it does not exist.
 
-**.env file** (create in the same folder as the binary):
+**Resolution order** (highest priority first):
+
+1. Shell / system environment variables
+2. `.env` in the same folder as the binary (fills gaps not set in the shell)
+3. `~/.ez-web/.env` (fills remaining gaps; created automatically on first run if missing)
+
+**.env file** (either location):
 
 ```
 FIRECRAWL_API_KEY=fc-your_actual_key_here
@@ -32,7 +38,7 @@ export FIRECRAWL_API_KEY=fc-your_actual_key_here
 export OPENAI_API_KEY=sk-your_actual_key_here
 ```
 
-Shell variables take precedence over `.env`.
+Shell variables take precedence over both `.env` files.
 
 ### 3. Run
 
@@ -49,7 +55,7 @@ chmod +x ez-website-analyzer-macos-arm64   # use your platform file
 ez-website-analyzer-windows-x86_64.exe
 ```
 
-Output is written to a `runs/` folder next to the binary.
+Output is written to `runs/` next to the binary when that folder already exists; otherwise to `~/.ez-web/runs/` (created on first run).
 
 ## Source install
 

@@ -68,8 +68,12 @@ gitignored.
   Apple Silicon in CI. Binaries are published to the public assets repo only.
 * Runtime deps: requirements.txt (firecrawl-py, openai, python-dotenv,
   pydantic). PyInstaller is installed only in CI, not in requirements.txt.
-* Frozen binary behavior: .env and runs/ resolve next to the executable
-  (sys.executable), not the PyInstaller temp extraction directory.
+* Frozen binary behavior:
+  - .env: shell env first, then binary-dir/.env (gap-fill), then ~/.ez-web/.env
+    (gap-fill; auto-created from bundled .env.example on first run if missing).
+  - runs/: binary-dir/runs/ when that folder exists; otherwise ~/.ez-web/runs/
+    (created on first run). RUNS_DIR env overrides both.
+  - Paths resolve from sys.executable, not the PyInstaller temp directory.
 * Binary release assets (ez-website-analyzer-assets):
   - ez-website-analyzer-linux-x86_64
   - ez-website-analyzer-windows-x86_64.exe
