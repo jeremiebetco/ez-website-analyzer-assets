@@ -40,6 +40,8 @@ export OPENAI_API_KEY=sk-your_actual_key_here
 
 Shell variables take precedence over both `.env` files.
 
+See [README Setup → Configuration & paths](README.md#configuration--paths) for the full source-vs-binary comparison table.
+
 ### 3. Run
 
 **macOS / Linux:**
@@ -55,7 +57,7 @@ chmod +x ez-website-analyzer-macos-arm64   # use your platform file
 ez-website-analyzer-windows-x86_64.exe
 ```
 
-Output is written to `runs/` next to the binary when that folder already exists; otherwise to `~/.ez-web/runs/` (created on first run).
+Output defaults to `~/.ez-web/runs/`; create `runs/` beside the binary to write output there instead.
 
 ## Source install
 

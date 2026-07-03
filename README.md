@@ -69,6 +69,8 @@ Historical flat reports in `reports/` are from the previous analyzer version and
 
 The `runs/` directory is tracked in git (via `runs/.gitkeep`), but run output inside it is gitignored.
 
+**Source install:** output under project `runs/`. **Binary install:** output under `~/.ez-web/runs/` unless `runs/` exists beside the executable.
+
 ## Setup
 
 Install dependencies:
@@ -77,7 +79,17 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
-Set your API keys via **either** a `.env` file **or** system/shell environment variables. The app loads `.env` from the project root at startup, but existing shell variables take precedence.
+### Configuration & paths
+
+| | Source install (`./analyzer.sh`) | Binary install (release executable) |
+|---|---|---|
+| **`.env` locations** | Project root `.env` only | Shell env → `.env` beside binary (gap-fill) → `~/.ez-web/.env` (gap-fill; auto-created on first run) |
+| **`runs/` output** | `runs/` at project root (or `RUNS_DIR` override) | `~/.ez-web/runs/` by default; use `runs/` beside the binary if you create that folder |
+| **`RUNS_DIR` override** | Any explicit value wins in both modes | Same |
+
+Shell / system environment variables always take highest priority. See `.env.example` for all optional keys.
+
+### Source install
 
 **Option A — `.env` file** (recommended for local dev):
 
@@ -140,6 +152,14 @@ SPA_PRIME_WAIT_MS=3000
 
 **Credit note:** Rich scrape requests multiple formats per page (markdown, HTML, branding, screenshot, etc.). Phase 2 may run additional interact sessions on the entry URL. Full crawl at 80 pages uses significantly more Firecrawl credits than markdown-only scraping.
 
+### Binary install
+
+For the release executable (no Python required):
+
+- **API keys:** shell environment variables, then `.env` beside the binary (gap-fill), then `~/.ez-web/.env` (gap-fill; created from the bundled template on first run if missing).
+- **Output:** `~/.ez-web/runs/` by default; create `runs/` beside the executable to write output there instead.
+- **Download:** see [Releases](#releases) for platform assets and checksum verification.
+
 ## Custom scrape actions
 
 `CUSTOM_ACTIONS` in `src/analyzer.py` are **per-domain overrides/seeds**. The pipeline also derives selector actions at runtime from discovered clickables. Static entries are merged with derived actions.
@@ -172,7 +192,7 @@ Each binary ships with a matching `.sha256` checksum file.
 ### Run a release binary
 
 1. Download the binary for your OS from the latest release.
-2. Set your API keys — shell variables, a `.env` beside the binary, and/or `~/.ez-web/.env` (auto-created on first run with placeholder template). See [install.md](install.md) for precedence.
+2. Set your API keys — see [Setup → Configuration & paths](#configuration--paths) for `.env` resolution (shell, binary `.env`, `~/.ez-web/.env`).
 3. Run the binary from a terminal:
 
 ```bash
@@ -185,7 +205,7 @@ chmod +x ez-website-analyzer-macos-arm64   # or your platform asset
 ez-website-analyzer-windows-x86_64.exe
 ```
 
-The frozen binary loads configuration in this order: shell environment variables, then `.env` beside the executable (gap-fill), then `~/.ez-web/.env` (gap-fill; created on first run if missing). Default output goes to `runs/` beside the binary when that folder exists; otherwise to `~/.ez-web/runs/`. Source installs (`./analyzer.sh`) still use the project root for `.env` and `runs/`.
+See [Setup → Configuration & paths](#configuration--paths) for `.env` and `runs/` resolution. Steps above cover download and checksum verification.
 
 ### Verify checksum
 
